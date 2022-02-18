@@ -3,9 +3,10 @@ import { AuthContext } from '../contexts/AuthContext';
 import { withSSRAuth } from '../utils/withSSRAuth';
 import { api } from '../services/apiClient';
 import { setupAPIClient } from '../services/api';
+import { Can } from '../components/Can';
 export default function Dashbord(){
 
-    const { user } = useContext(AuthContext)
+    const { user, signOut } = useContext(AuthContext)
 
     useEffect(() => {
         api.get('/me')
@@ -14,15 +15,22 @@ export default function Dashbord(){
     }, [])
 
     return(
-        <h1>dashbord: {user?.email}</h1>
+        <>
+            <h1>dashbord: {user?.email}</h1>
+            <button onClick={signOut}>SignOut</button>
+            <Can permissions={['metrics.list']}>
+                <h1>Métricas</h1>
+            </Can>
+        </>
     )
 }
 
 export const getServerSideProps = withSSRAuth(async(ctx) => {
-    const apiClient = setupAPIClient();
+    const apiClient = setupAPIClient(ctx);
     const response = await apiClient.get('/me');
+    
+    console.log(response)
 
-    console.log(response.data)
     return {
         props: {}
     }
